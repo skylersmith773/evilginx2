@@ -163,7 +163,7 @@ func (h *Help) PrintBrief(cmd string) error {
 				rows = append(rows, cmd+kk)
 				vals = append(vals, subm[k])
 			}
-			out += AsDescription(rows, vals)
+			out += AsRows(rows, vals)
 		}
 	}
 	log.Printf("\n%s\n", out)

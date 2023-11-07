@@ -24,24 +24,6 @@ func viewLen(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-func truncString(s string, maxLen int) string {
-	var ansi = regexp.MustCompile("\033\\[(?:[0-9]{1,3}(?:;[0-9]{1,3})*)?[m|K]")
-	sm := s
-	for _, m := range ansi.FindAllString(sm, -1) {
-		sm = strings.Replace(sm, m, "", -1)
-	}
-	nsm := sm
-	if utf8.RuneCountInString(sm) > maxLen {
-		if maxLen > 3 {
-			nsm = nsm[:maxLen-3] + "..."
-		} else {
-			nsm = nsm[:maxLen]
-		}
-		s = strings.Replace(s, sm, nsm, -1)
-	}
-	return s
-}
-
 func maxLen(strings []string) int {
 	maxLen := 0
 	for _, s := range strings {
@@ -60,8 +42,6 @@ const (
 	AlignCenter = Alignment(1)
 	AlignRight  = Alignment(2)
 )
-
-const minColLen = 16
 
 func getPads(s string, maxLen int, align Alignment) (lPad int, rPad int) {
 	len := viewLen(s)
@@ -87,22 +67,14 @@ func padded(s string, maxLen int, align Alignment) string {
 }
 
 func AsTable(columns []string, rows [][]string) string {
-	colMaxLens := make([]int, 0)
-
 	dg := color.New(color.FgHiBlack)
 	for i, col := range columns {
-		clen := viewLen(col) + 4
-		if clen < minColLen {
-			clen = minColLen
-		}
-		colMaxLens = append(colMaxLens, clen)
-
 		columns[i] = fmt.Sprintf(" %s ", col)
 	}
 
 	for i, row := range rows {
 		for j, cell := range row {
-			rows[i][j] = fmt.Sprintf(" %s ", truncString(cell, colMaxLens[j])) //cell)
+			rows[i][j] = fmt.Sprintf(" %s ", cell)
 		}
 	}
 
@@ -111,7 +83,6 @@ func AsTable(columns []string, rows [][]string) string {
 	for colIndex, colHeader := range columns {
 		column := []string{colHeader}
 		for _, row := range rows {
-
 			column = append(column, row[colIndex])
 		}
 		mLen := maxLen(column)
@@ -149,16 +120,7 @@ func AsRows(keys []string, vals []string) string {
 	mLen := maxLen(keys)
 	var table string
 	for i, _ := range keys {
-		table += clr.Sprintf(" %s : ", padded(keys[i], mLen, AlignLeft)) + fmt.Sprintf("%s\n", vals[i])
-	}
-	return table
-}
-
-func AsDescription(keys []string, vals []string) string {
-	clr := color.New(color.FgHiBlack)
-	var table string
-	for i, _ := range keys {
-		table += clr.Sprintf(" %s", keys[i]) + fmt.Sprintf("\n   %s\n", vals[i])
+		table += clr.Sprintf("%s : ", padded(keys[i], mLen, AlignRight)) + fmt.Sprintf("%s\n", vals[i])
 	}
 	return table
 }

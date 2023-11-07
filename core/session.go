@@ -10,12 +10,10 @@ type Session struct {
 	Username      string
 	Password      string
 	Custom        map[string]string
-	Params        map[string]string
 	Tokens        map[string]map[string]*database.Token
 	RedirectURL   string
 	IsDone        bool
 	IsAuthUrl     bool
-	IsForwarded   bool
 	RedirectCount int
 	PhishLure     *Lure
 }
@@ -27,11 +25,9 @@ func NewSession(name string) (*Session, error) {
 		Username:      "",
 		Password:      "",
 		Custom:        make(map[string]string),
-		Params:        make(map[string]string),
 		RedirectURL:   "",
 		IsDone:        false,
 		IsAuthUrl:     false,
-		IsForwarded:   false,
 		RedirectCount: 0,
 		PhishLure:     nil,
 	}

